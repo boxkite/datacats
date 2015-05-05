@@ -166,7 +166,7 @@ def run_container(name, image, command=None, environment=None,
             host_config=create_host_config(binds=binds))
     # Use the already-spun-up one
     else:
-        c = ps[1]
+        c = ps[0]
     try:
         _docker.start(
             container=c['Id'],
