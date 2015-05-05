@@ -148,17 +148,25 @@ def run_container(name, image, command=None, environment=None,
     requested port.
     """
     binds = ro_rw_to_binds(ro, rw)
-    c = _docker.create_container(
-        name=name,
-        image=image,
-        command=command,
-        environment=environment,
-        volumes=binds_to_volumes(binds),
-        detach=detach,
-        stdin_open=False,
-        tty=False,
-        ports=list(port_bindings) if port_bindings else None,
-        host_config=create_host_config(binds=binds))
+    # Check if our container exists already (by name)...
+    ps = [i for i in _docker.containers() if '/' + name in i['Names']]
+
+    # No matching containers...
+    if not len(ps):
+        c = _docker.create_container(
+            name=name,
+            image=image,
+            command=command,
+            environment=environment,
+            volumes=binds_to_volumes(binds),
+            detach=detach,
+            stdin_open=False,
+            tty=False,
+            ports=list(port_bindings) if port_bindings else None,
+            host_config=create_host_config(binds=binds))
+    # Use the already-spun-up one
+    else:
+        c = ps[1]
     try:
         _docker.start(
             container=c['Id'],
