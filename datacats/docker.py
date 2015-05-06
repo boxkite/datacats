@@ -38,10 +38,15 @@ _version = get_api_version(DEFAULT_DOCKER_API_VERSION,
 _docker = Client(version=_version, **_docker_kwargs)
 
 class WebCommandError(Exception):
+    def __init__(self, command, container_id, logs):
+        self.command = command
+        self.container_id = container_id
+        self.logs = logs
+
     def __str__(self):
         return ('Command failed: {0}\n  View output:'
             ' docker logs {1}\n  Remove stopped container:'
-            ' docker rm {1}'.format(*self.args))
+            ' docker rm {1}'.format(self.command, self.container_id))
 
 class PortAllocatedError(Exception):
     pass
@@ -116,9 +121,12 @@ def web_command(command, ro=None, rw=None, links=None,
                 c['Id'], stdout=True, stderr=True, stream=True):
             stream_output.write(output)
     if _docker.wait(c['Id']):
+        # Before the (potential) cleanup, grab the logs!
+        logs = _docker.logs(c['Id'])
+
         if clean_up:
             remove_container(c['Id'])
-        raise WebCommandError(command, c['Id'][:12])
+        raise WebCommandError(command, c['Id'][:12], logs)
     if commit:
         rval = _docker.commit(c['Id'])
     if not remove_container(c['Id']):
@@ -140,17 +148,25 @@ def run_container(name, image, command=None, environment=None,
     requested port.
     """
     binds = ro_rw_to_binds(ro, rw)
-    c = _docker.create_container(
-        name=name,
-        image=image,
-        command=command,
-        environment=environment,
-        volumes=binds_to_volumes(binds),
-        detach=detach,
-        stdin_open=False,
-        tty=False,
-        ports=list(port_bindings) if port_bindings else None,
-        host_config=create_host_config(binds=binds))
+    # Check if our container exists already (by name)...
+    ps = [i for i in _docker.containers() if '/' + name in i['Names']]
+
+    # No matching containers...
+    if not len(ps):
+        c = _docker.create_container(
+            name=name,
+            image=image,
+            command=command,
+            environment=environment,
+            volumes=binds_to_volumes(binds),
+            detach=detach,
+            stdin_open=False,
+            tty=False,
+            ports=list(port_bindings) if port_bindings else None,
+            host_config=create_host_config(binds=binds))
+    # Use the already-spun-up one
+    else:
+        c = ps[0]
     try:
         _docker.start(
             container=c['Id'],
