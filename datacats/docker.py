@@ -24,6 +24,7 @@ from docker.errors import APIError
 
 MINIMUM_API_VERSION = '1.16'
 
+
 def get_api_version(*versions):
     # compare_version is backwards
     def cmp(a, b):
@@ -33,9 +34,10 @@ def get_api_version(*versions):
 _docker_kwargs = kwargs_from_env()
 _version_client = Client(version=MINIMUM_API_VERSION, **_docker_kwargs)
 _version = get_api_version(DEFAULT_DOCKER_API_VERSION,
-    _version_client.version()['ApiVersion'])
+                           _version_client.version()['ApiVersion'])
 
 _docker = Client(version=_version, **_docker_kwargs)
+
 
 class WebCommandError(Exception):
     def __init__(self, command, container_id, logs):
@@ -45,18 +47,23 @@ class WebCommandError(Exception):
 
     def __str__(self):
         return ('Command failed: {0}\n  View output:'
-            ' docker logs {1}\n  Remove stopped container:'
-            ' docker rm {1}'.format(self.command, self.container_id))
+                ' docker logs {1}\n  Remove stopped container:'
+                ' docker rm {1}'.format(self.command, self.container_id))
+
 
 class PortAllocatedError(Exception):
     pass
 
+
 _boot2docker = None
+
+
 def is_boot2docker():
     global _boot2docker
     if _boot2docker is None:
         _boot2docker = 'Boot2Docker' in _docker.info()['OperatingSystem']
     return _boot2docker
+
 
 def docker_host():
     url = _docker_kwargs.get('base_url')
@@ -79,6 +86,7 @@ def ro_rw_to_binds(ro, rw):
             out[localdir] = {'bind': binddir, 'ro': False}
     return out
 
+
 def binds_to_volumes(volumes):
     """
     Return the target 'bind' dirs of volumnes from a volumes dict
@@ -86,9 +94,10 @@ def binds_to_volumes(volumes):
     """
     return [v['bind'] for v in volumes.itervalues()]
 
+
 def web_command(command, ro=None, rw=None, links=None,
-        image='datacats/web', volumes_from=None, commit=False,
-        clean_up=False, stream_output=None):
+                image='datacats/web', volumes_from=None, commit=False,
+                clean_up=False, stream_output=None):
     """
     Run a single command in a web image optionally preloaded with the ckan
     source and virtual envrionment.
@@ -137,9 +146,10 @@ def web_command(command, ro=None, rw=None, links=None,
     if commit:
         return rval['Id']
 
+
 def run_container(name, image, command=None, environment=None,
-        ro=None, rw=None, links=None, detach=True, volumes_from=None,
-        port_bindings=None):
+                  ro=None, rw=None, links=None, detach=True, volumes_from=None,
+                  port_bindings=None):
     """
     Wrapper for docker create_container, start calls
 
@@ -177,6 +187,7 @@ def run_container(name, image, command=None, environment=None,
         raise
     return c
 
+
 def remove_container(name, force=False):
     """
     Wrapper for docker remove_container
@@ -195,6 +206,7 @@ def remove_container(name, force=False):
     except APIError as e:
         return False
 
+
 def inspect_container(name):
     """
     Wrapper for docker inspect_container
@@ -205,6 +217,7 @@ def inspect_container(name):
         return _docker.inspect_container(name)
     except APIError as e:
         return None
+
 
 def container_logs(name, tail, follow, timestamps):
     """
@@ -225,11 +238,13 @@ def container_logs(name, tail, follow, timestamps):
         timestamps=timestamps,
         )
 
+
 def pull_stream(image):
     """
     Return generator of pull status objects
     """
     return (json.loads(s) for s in _docker.pull(image, stream=True))
+
 
 def data_only_container(name, volumes):
     """
@@ -243,7 +258,7 @@ def data_only_container(name, volumes):
         return
     c = _docker.create_container(
         name=name,
-        image='datacats/postgres', # any image will do
+        image='datacats/postgres',  # any image will do
         command='true',
         volumes=volumes,
         detach=True)

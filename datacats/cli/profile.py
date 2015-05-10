@@ -8,6 +8,7 @@ from os.path import exists
 
 from datacats.userprofile import UserProfile
 
+
 def get_working_profile(environment):
     """
     Return a complete UserProfile with ssh keys configured either
@@ -41,6 +42,7 @@ def get_working_profile(environment):
 
     return profile
 
+
 def _create_profile(profile):
     """
     Generate SSH private/public keys so for logging in to
@@ -56,4 +58,3 @@ def _create_profile(profile):
         return False
     profile.generate_ssh_key()
     return True
-

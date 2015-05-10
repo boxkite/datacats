@@ -9,6 +9,7 @@ from shutil import rmtree
 
 from datacats.environment import Environment, DatacatsError
 
+
 def purge(opts):
     """Purge environment database and uploaded files
 

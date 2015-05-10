@@ -12,9 +12,11 @@ from datacats.environment import Environment, DatacatsError
 from datacats.cli.install import install
 from datacats.validate import valid_deploy_name
 
+
 def write(s):
     sys.stdout.write(s)
     sys.stdout.flush()
+
 
 def create(opts):
     """Create a new environment
@@ -41,8 +43,9 @@ part of this path will be used as the environment name.
         ckan_version=opts['--ckan'],
         )
 
+
 def create_environment(environment_dir, port, ckan_version, create_skin,
-        start_web, create_sysadmin):
+                       start_web, create_sysadmin):
     try:
         # FIXME: only 2.3 preload supported at the moment
         environment = Environment.new(environment_dir, '2.3', port)

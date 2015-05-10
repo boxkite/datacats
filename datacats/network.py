@@ -9,12 +9,14 @@ from requests import get, ConnectionError, Timeout
 
 from datacats.docker import inspect_container
 
+
 class ServiceTimeout(Exception):
     pass
 
 RETRY_DELAY_SECONDS = 0.1
 READ_TIMEOUT_SECONDS = 0.1
 REQUEST_TIMEOUT_SECONDS = 3
+
 
 def wait_for_service_available(container, url, timeout):
     """
@@ -33,7 +35,7 @@ def wait_for_service_available(container, url, timeout):
             raise ServiceTimeout
         try:
             response = get(url,
-                timeout=min(remaining, REQUEST_TIMEOUT_SECONDS))
+                           timeout=min(remaining, REQUEST_TIMEOUT_SECONDS))
             if 500 <= response.status_code < 600:
                 return False
             return True

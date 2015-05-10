@@ -58,11 +58,13 @@ COMMANDS = {
     'stop': manage.stop,
 }
 
+
 def option_not_yet_implemented(opts, name):
     if name not in opts or not opts[name]:
         return
     print "Option {0} is not yet implemented.".format(name)
     sys.exit(1)
+
 
 def main():
     args = sys.argv[1:]
@@ -81,7 +83,7 @@ def main():
         if help_:
             args = ['--help']
         return docopt(__doc__, args,
-            version=pkg_resources.require("datacats")[0].version)
+                      version=pkg_resources.require("datacats")[0].version)
     if not command_fn:
         return docopt(__doc__, ['--help'])
 
