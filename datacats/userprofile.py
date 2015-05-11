@@ -15,6 +15,7 @@ from datacats.scripts import KNOWN_HOSTS, SSH_CONFIG
 
 DATACATS_USER_HOST = 'datacats@command.datacats.com'
 
+
 class UserProfile(object):
     """
     DataCats user profile settings object
@@ -54,8 +55,9 @@ class UserProfile(object):
         """
         web_command(
             command=["ssh-keygen", "-q", "-t", "rsa", "-N", "", "-C",
-                "datacats generated {0}@{1}".format(getuser(), gethostname()),
-                "-f", "/output/id_rsa"],
+                     "datacats generated {0}@{1}"
+                     .format(getuser(), gethostname()),
+                     "-f", "/output/id_rsa"],
             rw={self.profiledir: '/output'},
             )
 
@@ -66,8 +68,8 @@ class UserProfile(object):
         try:
             web_command(
                 command=["ssh",
-                    _project_user_host(project),
-                    'test'],
+                         _project_user_host(project),
+                         'test'],
                 ro={
                     KNOWN_HOSTS: '/root/.ssh/known_hosts',
                     SSH_CONFIG: '/etc/ssh/ssh_config',
@@ -116,7 +118,6 @@ class UserProfile(object):
         except WebCommandError:
             return False
 
-
     def deploy(self, project, target_name, stream_output=None):
         """
         Return True if deployment was successful
@@ -151,8 +152,8 @@ class UserProfile(object):
         except WebCommandError:
             return False
 
+
 def _project_user_host(project):
     if project.deploy_target is None:
         return DATACATS_USER_HOST
     return project.deploy_target
-

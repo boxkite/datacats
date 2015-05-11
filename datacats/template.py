@@ -8,6 +8,7 @@ from os import makedirs
 from os.path import dirname
 from shutil import copyfile
 
+
 def ckan_extension_template(name, target):
     """
     Create ckanext-(name) in target directory.
@@ -23,7 +24,7 @@ def ckan_extension_template(name, target):
     here = dirname(__file__)
     copyfile(here + '/images/chart.png', staticdir + '/chart.png')
     copyfile(here + '/images/datacats-footer.png',
-        staticdir + '/datacats-footer.png')
+             staticdir + '/datacats-footer.png')
 
     filecontents = [
         (setupdir + '/setup.py', SETUP_PY),

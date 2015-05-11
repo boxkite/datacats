@@ -10,6 +10,7 @@ from datacats.cli.profile import get_working_profile
 from datacats.cli.create import confirm_password
 from datacats.validate import valid_deploy_name
 
+
 def deploy(environment, opts):
     """Deploy environment to production DataCats.com cloud service
 
