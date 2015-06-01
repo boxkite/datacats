@@ -10,6 +10,8 @@ from docker.errors import APIError
 from shutil import rmtree
 from os.path import expanduser, join as path_join, exists as path_exists
 
+from datacats.docker import MINIMUM_API_VERSION
+
 
 def _make_container_name(name, service):
     """
@@ -26,7 +28,7 @@ def _make_docker_client():
     Makes a Docker-py client object with the environment settings.
     :return: A docker-py Client object.
     """
-    return Client(**kwargs_from_env())
+    return Client(version=MINIMUM_API_VERSION, **kwargs_from_env())
 
 
 def has_container(name, client=None):
