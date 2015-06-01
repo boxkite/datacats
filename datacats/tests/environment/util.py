@@ -1,3 +1,9 @@
+# Copyright 2014-2015 Boxkite Inc.
+
+# This file is part of the DataCats package and is released under
+# the terms of the GNU Affero General Public License version 3.0.
+# See LICENSE.txt or http://www.fsf.org/licensing/licenses/agpl-3.0.html
+
 """
 This module contains some drop-dead simple implementations of
 datacats features so that we can "mock" them.
