@@ -9,7 +9,7 @@ IGNORE_PEP8 = ('E123', 'W503', 'E128', 'E125')
 class TestStyle(unittest.TestCase):
     def test_pep8_conformance(self):
         """
-        Tests pep8 conformence.
+        Tests pep8 conformance.
         """
         pep8style = pep8.StyleGuide(quiet=False, ignore=IGNORE_PEP8, max_line_length=100)
         result = pep8style.check_files(['datacats'])

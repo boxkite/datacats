@@ -28,6 +28,7 @@ class TestCreate(TestCase):
         """
         old_stdout = sys.stdout
         try:
+            # Swallow all the (non-optional) output.
             sys.stdout = open(os.devnull, 'w')
             create_environment(ENV_NAME, None, '2.3', False, False, False, None)
         except DatacatsError as e:
