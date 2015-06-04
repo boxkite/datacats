@@ -163,7 +163,7 @@ def binds_to_volumes(volumes):
 
 def web_command(command, ro=None, rw=None, links=None,
                 image='datacats/web', volumes_from=None, commit=False,
-                clean_up=False, stream_output=None):
+                clean_up=False, stream_output=None, ssh=False):
     """
     Run a single command in a web image optionally preloaded with the ckan
     source and virtual envrionment.
@@ -202,7 +202,7 @@ def web_command(command, ro=None, rw=None, links=None,
 
         if clean_up:
             remove_container(c['Id'])
-        raise WebCommandError(command, c['Id'][:12], logs, ssh=False)
+        raise WebCommandError(command, c['Id'][:12], logs, ssh=ssh)
     if commit:
         rval = _get_docker().commit(c['Id'])
     if not remove_container(c['Id']):

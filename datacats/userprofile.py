@@ -84,6 +84,7 @@ class UserProfile(object):
                          getuser(), gethostname()),
                      "-f", "/output/id_rsa"],
             rw={self.profiledir: '/output'},
+            ssh=True
             )
 
     def test_ssh_key(self, environment):
