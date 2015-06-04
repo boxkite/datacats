@@ -202,7 +202,7 @@ def web_command(command, ro=None, rw=None, links=None,
 
         if clean_up:
             remove_container(c['Id'])
-        raise WebCommandError(command, c['Id'][:12], logs)
+        raise WebCommandError(command, c['Id'][:12], logs, ssh=False)
     if commit:
         rval = _get_docker().commit(c['Id'])
     if not remove_container(c['Id']):
