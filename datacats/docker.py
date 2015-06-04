@@ -103,14 +103,15 @@ def _get_docker():
 
 class WebCommandError(Exception):
 
-    def __init__(self, command, container_id, logs):
+    def __init__(self, command, container_id, logs, ssh=False):
         self.command = command
         self.container_id = container_id
         self.logs = logs
+        self.ssh = ssh
 
     def __str__(self):
         return \
-            ('\nSSH command to remote server failed\n'
+            ('\nSSH command to remote server failed\n' if self.ssh else ''
              '    Command: {0}\n'
              '    Docker Error Log:\n'
              '    {1}\n'
