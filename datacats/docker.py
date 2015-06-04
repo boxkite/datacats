@@ -103,14 +103,15 @@ def _get_docker():
 
 class WebCommandError(Exception):
 
-    def __init__(self, command, container_id, logs):
+    def __init__(self, command, container_id, logs, ssh=False):
         self.command = command
         self.container_id = container_id
         self.logs = logs
+        self.ssh = ssh
 
     def __str__(self):
         return \
-            ('\nSSH command to remote server failed\n'
+            ('\nSSH command to remote server failed\n' if self.ssh else ''
              '    Command: {0}\n'
              '    Docker Error Log:\n'
              '    {1}\n'
@@ -162,7 +163,7 @@ def binds_to_volumes(volumes):
 
 def web_command(command, ro=None, rw=None, links=None,
                 image='datacats/web', volumes_from=None, commit=False,
-                clean_up=False, stream_output=None):
+                clean_up=False, stream_output=None, ssh=False):
     """
     Run a single command in a web image optionally preloaded with the ckan
     source and virtual envrionment.
@@ -201,7 +202,7 @@ def web_command(command, ro=None, rw=None, links=None,
 
         if clean_up:
             remove_container(c['Id'])
-        raise WebCommandError(command, c['Id'][:12], logs)
+        raise WebCommandError(command, c['Id'][:12], logs, ssh=ssh)
     if commit:
         rval = _get_docker().commit(c['Id'])
     if not remove_container(c['Id']):
