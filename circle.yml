@@ -22,3 +22,4 @@ test:
     - datacats init site1 -n
     - datacats install site1
     - python setup.py test -s datacats.tests.basic
+    - "[ $(datacats --version | wc -l) == 1 ]"
