@@ -4,12 +4,13 @@
 [![docs](https://readthedocs.org/projects/docs/badge/?version=latest)](http://docs.datacats.com/)
 
 
-datacats uses Docker to give you fully self-contained [CKAN](http://ckan.org) dev environments on
-any platform, along with a command to deploy that exact environment to the cloud.
+[CKAN]((http://ckan.org), a powerful CMS for publishing datasets, can be quite difficult to develop and deploy, especially for beginners. The aim of datacats is to make this easier and bring CKAN within reach for a much wider audience.
 
+datacats relies on [Docker](https://www.docker.com/) to “containerize” all the components. That gives you a CKAN  environment that is fully self-contained, runs on any platform and can be deployed to the cloud in one command.
 
 ## Install
 Please see detailed OS-specific [installation instructions in the docs](http://docs.datacats.com/guide.html#installation).
+
 
 
 ## Create a CKAN environment
