@@ -272,6 +272,17 @@ class Environment(object):
             command='/bin/chown -R www-data: /var/www/storage',
             rw={self.sitedir + '/files': '/var/www/storage'})
 
+    def fix_flickrapi_tokencache_permissions(self):
+        """
+        Set the owner of the flickrapi-tokencache folder to www-data container user
+
+        This folder is required for extensions using the flickrapi,
+        e.g. ckan-galleries
+        """
+        web_command(
+            command='/bin/chown -R www-data: /root/.flickr',
+            rw={self.sitedir + '/flickrapi-tokencache': '/root/.flickr'})
+
     def create_ckan_ini(self):
         """
         Use make-config to generate an initial development.ini file
@@ -488,8 +499,8 @@ class Environment(object):
 
         if datapusher:
             if 'datapusher' not in self.containers_running():
-                raise DatacatsError(container_logs(self._get_container_name('datapusher'), "all",
-                                                   False, False))
+                raise DatacatsError(container_logs(
+                    self._get_container_name('datapusher'), "all", False, False))
             links[self._get_container_name('datapusher')] = 'datapusher'
 
         try:
@@ -498,7 +509,9 @@ class Environment(object):
                 image='datacats/web',
                 rw={self.sitedir + '/files': '/var/www/storage',
                     self.sitedir + '/run/development.ini':
-                        '/project/development.ini'},
+                        '/project/development.ini',
+                    self.sitedir + '/flickrapi-tokencache':
+                        '/root/.flickr'},
                 ro=dict({
                     self.target: '/project/',
                     WEB: '/scripts/web.sh',
@@ -671,6 +684,7 @@ class Environment(object):
             ] + venv_volumes + [
             '-v', self.target + ':/project:rw',
             '-v', self.sitedir + '/files:/var/www/storage:rw',
+            '-v', self.sitedir + '/flickrapi-tokencache:/root/.flickr:rw',
             '-v', script + ':/scripts/shell.sh:ro',
             '-v', PASTER_CD + ':/scripts/paster_cd.sh:ro',
             '-v', self.sitedir + '/run/run.ini:/project/development.ini:ro',
