@@ -10,7 +10,7 @@ set -e
 
 if [ -e /etc/environment ]; then
     source /etc/environment
-    export http_proxy HTTP_PROXY https_proxy HTTPS_PROXY no_proxy NO_PROXY
+    export http_proxy HTTP_PROXY https_proxy HTTPS_PROXY no_proxy NO_PROXY HTTP_X_FORWARDED_PROTO
 fi
 
 /usr/lib/ckan/bin/pip install -e "$1"

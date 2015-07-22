@@ -502,6 +502,8 @@ class Environment(object):
             ro = {self.datadir + '/venv': '/usr/lib/ckan'}
             volumes_from = None
 
+        ro.update(self._environment_settings())
+
         links = {
             self._get_container_name('solr'): 'solr',
             self._get_container_name('postgres'): 'db'
