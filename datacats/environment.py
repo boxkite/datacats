@@ -502,6 +502,8 @@ class Environment(object):
             ro = {self.datadir + '/venv': '/usr/lib/ckan'}
             volumes_from = None
 
+        ro.update(self._environment_settings())
+
         links = {
             self._get_container_name('solr'): 'solr',
             self._get_container_name('postgres'): 'db'
@@ -704,7 +706,7 @@ class Environment(object):
                 command += ['--config=/project/development.ini']
             command = [self.extension_dir] + command
 
-        proxy_settings = self._proxy_settings()
+        proxy_settings = self._environment_settings()
         if proxy_settings:
             venv_volumes += ['-v',
                              self.sitedir + '/run/proxy-environment:/etc/environment:ro']
@@ -803,7 +805,7 @@ class Environment(object):
         rw = {} if rw is None else dict(rw)
         ro = {} if ro is None else dict(ro)
 
-        ro.update(self._proxy_settings())
+        ro.update(self._environment_settings())
 
         if is_boot2docker():
             volumes_from = self._get_container_name('venv')
@@ -896,13 +898,14 @@ class Environment(object):
             yield log
         remove_container(c)
 
-    def _proxy_settings(self):
+    def _environment_settings(self):
         """
         Create/replace ~/.datacats/run/proxy-environment and return
         entry for ro mount for containers
         """
         if not ('https_proxy' in environ or 'HTTPS_PROXY' in environ
-                or 'http_proxy' in environ or 'HTTP_PROXY' in environ):
+                or 'http_proxy' in environ or 'HTTP_PROXY' in environ
+                or 'HTTP_X_FORWARDED_PROTO' in environ):
             return {}
         https_proxy = environ.get('https_proxy')
         if https_proxy is None:
@@ -914,6 +917,7 @@ class Environment(object):
         if no_proxy is None:
             no_proxy = environ.get('NO_PROXY', '')
         no_proxy = no_proxy + ',solr,db'
+        https = environ.get('HTTP_X_FORWARDED_PROTO', 'http')
 
         out = [
             'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:'
@@ -927,6 +931,8 @@ class Environment(object):
         if no_proxy is not None:
             out.append('no_proxy=' + posix_quote(no_proxy) + '\n')
             out.append('NO_PROXY=' + posix_quote(no_proxy) + '\n')
+        if https is not None:
+            out.append('HTTP_X_FORWARDED_PROTO=' + posix_quote(https) + '\n')
 
         with open(self.sitedir + '/run/proxy-environment', 'w') as f:
             f.write("".join(out))
