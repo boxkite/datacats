@@ -704,7 +704,7 @@ class Environment(object):
                 command += ['--config=/project/development.ini']
             command = [self.extension_dir] + command
 
-        proxy_settings = self._proxy_settings()
+        proxy_settings = self._environment_settings()
         if proxy_settings:
             venv_volumes += ['-v',
                              self.sitedir + '/run/proxy-environment:/etc/environment:ro']
@@ -803,7 +803,7 @@ class Environment(object):
         rw = {} if rw is None else dict(rw)
         ro = {} if ro is None else dict(ro)
 
-        ro.update(self._proxy_settings())
+        ro.update(self._environment_settings())
 
         if is_boot2docker():
             volumes_from = self._get_container_name('venv')
@@ -896,7 +896,7 @@ class Environment(object):
             yield log
         remove_container(c)
 
-    def _proxy_settings(self):
+    def _environment_settings(self):
         """
         Create/replace ~/.datacats/run/proxy-environment and return
         entry for ro mount for containers
