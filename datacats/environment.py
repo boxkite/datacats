@@ -902,7 +902,8 @@ class Environment(object):
         entry for ro mount for containers
         """
         if not ('https_proxy' in environ or 'HTTPS_PROXY' in environ
-                or 'http_proxy' in environ or 'HTTP_PROXY' in environ):
+                or 'http_proxy' in environ or 'HTTP_PROXY' in environ
+                or 'HTTP_X_FORWARDED_PROTO' in environ):
             return {}
         https_proxy = environ.get('https_proxy')
         if https_proxy is None:
@@ -914,6 +915,7 @@ class Environment(object):
         if no_proxy is None:
             no_proxy = environ.get('NO_PROXY', '')
         no_proxy = no_proxy + ',solr,db'
+        https = environ.get('HTTP_X_FORWARDED_PROTO', 'http')
 
         out = [
             'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:'
@@ -927,6 +929,8 @@ class Environment(object):
         if no_proxy is not None:
             out.append('no_proxy=' + posix_quote(no_proxy) + '\n')
             out.append('NO_PROXY=' + posix_quote(no_proxy) + '\n')
+        if https is not None:
+            out.append('HTTP_X_FORWARDED_PROTO=' + posix_quote(https) + '\n')
 
         with open(self.sitedir + '/run/proxy-environment', 'w') as f:
             f.write("".join(out))
