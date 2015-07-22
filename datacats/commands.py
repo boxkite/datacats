@@ -16,6 +16,7 @@ from datacats.environment import Environment
 from datacats.util import function_as_step, run_a_sequence_of_function_steps
 import task
 
+
 def create(environment_dir, port, ckan_version, create_skin,
     site_name, start_web, create_sysadmin, address, log_syslog=False,
     datapusher=True, site_url=None, progress_tracker=None):
@@ -44,12 +45,12 @@ def create(environment_dir, port, ckan_version, create_skin,
                 environment.create_ckan_ini]
 
         steps += [
-                environment.save_site,
-                environment.start_supporting_containers,
-                environment.fix_storage_permissions,
-                function_as_step(
-                    lambda: environment.update_ckan_ini(skin=create_skin),
-                    description="Create ckan INI file")]
+            environment.save_site,
+            environment.start_supporting_containers,
+            environment.fix_storage_permissions,
+            function_as_step(
+                lambda: environment.update_ckan_ini(skin=create_skin),
+                description="Create ckan INI file")]
 
         if create_skin and making_full_environment:
             steps.append(environment.create_install_template_skin)

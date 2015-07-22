@@ -12,6 +12,8 @@ import datacats
 from datacats.error import DatacatsError
 
 from datacats.cli.util import CLIProgressTracker, y_or_n_prompt, confirm_password
+from datacats.task import finish_init
+
 
 def write(s):
     sys.stdout.write(s)

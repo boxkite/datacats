@@ -4,12 +4,7 @@
 # the terms of the GNU Affero General Public License version 3.0.
 # See LICENSE.txt or http://www.fsf.org/licensing/licenses/agpl-3.0.html
 
-import sys
-from os import listdir
-from os.path import isdir, exists
 from datacats.docker import container_logs
-
-from clint.textui import colored
 
 from datacats.cli import manage
 from datacats.error import DatacatsError
