@@ -462,7 +462,7 @@ def create_source(srcdir, preload_image, datapusher=False):
 
 
 # Maps container extra names to actual names
-EXTRA_IMAGE_MAPPING = {'redis': 'redis'}
+EXTRA_IMAGE_MAPPING = {'redis': 'redis', 'geopusher': 'datacats/geopusher'}
 
 
 def start_supporting_containers(sitedir, srcdir, passwords,

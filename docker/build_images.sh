@@ -13,6 +13,7 @@ HERE="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
 docker build -t datacats/solr solr/
 docker build -t datacats/postgres postgres/
 docker build -t datacats/web web/
+docker build -t datacats/geopusher geopusher/
 docker build -t datacats/lessc lessc/
 docker build -t datacats/ckan ckan/
 docker build -t datacats/ckan:2.3 -f ckan/Dockerfile-2.3 ckan/
