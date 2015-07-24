@@ -628,6 +628,8 @@ class Environment(object):
         cp = SafeConfigParser()
         cp.read(self.target + '/.datacats-environment')
 
+        if any(x not in task.EXTRA_IMAGE_MAPPING for x in self.extra_containers):
+            raise DatacatsError('Some extra containers do not exist.')
         cp.set('datacats', 'extra_containers', ' '.join(self.extra_containers))
 
         with open(self.target + '/.datacats-environment', 'w') as f:

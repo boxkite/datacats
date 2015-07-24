@@ -267,12 +267,12 @@ def tweak(environment, opts):
 
 Usage:
   datacats tweak --install-postgis [ENVIRONMENT]
-  datacats tweak --add-redis [ENVIRONMENT]
+  datacats tweak --add-extra=EXTRA [ENVIRONMENT]
   datacats tweak --admin-password [ENVIRONMENT]
 
 Options:
   --install-postgis    Install postgis in ckan database
-  --add-redis          Adds redis next time this environment reloads
+  --add-extra=EXTRA    Adds redis next time this environment reloads
   -s --site=NAME       Choose a site to tweak [default: primary]
   -p --admin-password  Prompt to change the admin password
 
@@ -280,13 +280,12 @@ ENVIRONMENT may be an environment name or a path to an environment directory.
 
 Default: '.'
 """
-
     environment.require_data()
     if opts['--install-postgis']:
         print "Installing postgis"
         environment.install_postgis_sql()
-    if opts['--add-redis']:
+    if opts['--add-extra']:
         # Let the user know if they are trying to add it and it is already there
-        environment.add_extra_container('redis', error_on_exists=True)
+        environment.add_extra_container(opts['--add-extra'], error_on_exists=True)
     if opts['--admin-password']:
         environment.create_admin_set_password(confirm_password())
