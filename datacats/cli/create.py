@@ -8,11 +8,11 @@ import sys
 import types
 from os.path import abspath
 
-from datacats.environment import Environment
-from datacats.cli.install import install_all
+import datacats
 from datacats.error import DatacatsError
 
-from datacats.cli.util import CLIProgressTracker, y_or_n_prompt, confirm_password, function_as_step
+from datacats.cli.util import CLIProgressTracker, y_or_n_prompt, confirm_password
+from datacats.task import finish_init
 
 
 def write(s):
@@ -41,7 +41,11 @@ Options:
 ENVIRONMENT_DIR is a path for the new environment directory. The last
 part of this path will be used as the environment name.
 """
-    return create_environment(
+
+    progress_tracker = CLIProgressTracker(
+        task_title='Creating datacats site environment')
+
+    return datacats.create(
         environment_dir=opts['ENVIRONMENT_DIR'],
         port=opts['PORT'],
         create_skin=not opts['--bare'],
@@ -53,72 +57,10 @@ part of this path will be used as the environment name.
         log_syslog=opts['--syslog'],
         datapusher=not opts['--no-datapusher'],
         site_url=opts['--site-url'],
+        progress_tracker=progress_tracker
         )
 
 
-def create_environment(environment_dir, port, ckan_version, create_skin,
-        site_name, start_web, create_sysadmin, address, log_syslog=False,
-        datapusher=True, quiet=False, site_url=None, progress_tracker=None):
-    environment = Environment.new(environment_dir, ckan_version, site_name,
-                                  address=address, port=port)
-
-    try:
-        # There are a lot of steps we can/must skip if we're making a sub-site only
-        making_full_environment = not environment.data_exists()
-
-        steps = [
-            function_as_step(
-                lambda: environment.create_directories(making_full_environment),
-                description="Create the directories"),
-            function_as_step(environment.create_bash_profile)
-            ] + \
-            ([
-                function_as_step(environment.create_virtualenv),
-                function_as_step(environment.save),
-                function_as_step(lambda: environment.create_source(datapusher),
-                    description="Create source"),
-                function_as_step(environment.create_ckan_ini)] if making_full_environment else []
-            ) + \
-            [
-                function_as_step(environment.save_site),
-                function_as_step(environment.start_supporting_containers),
-                function_as_step(environment.fix_storage_permissions),
-                function_as_step(
-                    lambda: environment.update_ckan_ini(skin=create_skin),
-                    description="Create ckan INI file"),
-            ]
-
-        if create_skin and making_full_environment:
-            steps.append(function_as_step(environment.create_install_template_skin))
-
-        if not progress_tracker:
-            # by default we use a cli progress tracker
-            progress_tracker = CLIProgressTracker(
-                task_title='Creating datacats site environment',
-                total=len(steps),
-                quiet=quiet)
-        for step_num, step in enumerate(steps):
-            if not isinstance(step, types.FunctionType):
-                fn, descr = step
-            else:
-                fn, descr = step, "Please Wait"
-            progress_tracker.update_state(
-                state='PROGRESS',
-                meta={
-                    'current': step_num,
-                    'total': len(steps),
-                    'status': descr
-                })
-            fn()
-        if hasattr(progress_tracker, "clean_up"):
-            progress_tracker.clean_up()
-
-        finish_init(environment, start_web, create_sysadmin, address,
-           log_syslog=log_syslog, site_url=site_url)
-    except:
-        if hasattr(progress_tracker, "clean_up"):
-            progress_tracker.clean_up()
-        raise
 
 
 def reset(environment, opts):
@@ -223,43 +165,3 @@ ENVIRONMENT_DIR is an existing datacats environment directory. Defaults to '.'
     return finish_init(environment, start_web, create_sysadmin, address,
                        log_syslog=log_syslog, do_install=not no_install,
                        quiet=quiet, site_url=site_url)
-
-
-def finish_init(environment, start_web, create_sysadmin, address, log_syslog=False,
-                do_install=True, quiet=False, site_url=None):
-    """
-    Common parts of create and init: Install, init db, start site, sysadmin
-    """
-    if do_install:
-        install_all(environment, False, verbose=False, quiet=quiet)
-
-    if not quiet:
-        write('Initializing database')
-    environment.install_postgis_sql()
-    environment.ckan_db_init()
-    if not quiet:
-        write('\n')
-
-    if site_url:
-        try:
-            site_url = site_url.format(address=environment.address, port=environment.port)
-            environment.site_url = site_url
-            environment.save_site(False)
-        except (KeyError, IndexError, ValueError) as e:
-            raise DatacatsError('Could not parse site_url: {}'.format(e))
-
-    if start_web:
-        environment.start_ckan(address=address, log_syslog=log_syslog)
-        if not quiet:
-            write('Starting web server at {0} ...\n'.format(
-                environment.web_address()))
-
-    if create_sysadmin:
-        try:
-            adminpw = confirm_password()
-            environment.create_admin_set_password(adminpw)
-        except KeyboardInterrupt:
-            print
-
-    if not start_web:
-        environment.stop_supporting_containers()

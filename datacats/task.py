@@ -543,3 +543,62 @@ def containers_running(get_container_name):
         elif info:
             running.append(n)
     return running
+
+
+def finish_init(environment, start_web, create_sysadmin, address, log_syslog=False,
+                do_install=True, quiet=False, site_url=None):
+    """
+    Common parts of create and init: Install, init db, start site, sysadmin
+    """
+    if do_install:
+        install_all(environment)
+
+    environment.install_postgis_sql()
+    environment.ckan_db_init()
+
+    if site_url:
+        try:
+            site_url = site_url.format(address=environment.address, port=environment.port)
+            environment.site_url = site_url
+            environment.save_site(False)
+        except (KeyError, IndexError, ValueError) as e:
+            raise DatacatsError('Could not parse site_url: {}'.format(e))
+
+    if start_web:
+        environment.start_ckan(address=address, log_syslog=log_syslog)
+
+    if not start_web:
+        environment.stop_supporting_containers()
+
+
+def install_all(environment, clean=False, verbose=False, quiet=False):
+    logs = docker.check_connectivity()
+    if logs.strip():
+        raise DatacatsError(logs)
+
+    srcdirs = set()
+    reqdirs = set()
+    for d in os.listdir(environment.target):
+        fulld = environment.target + '/' + d
+        if not os.path.isdir(fulld):
+            continue
+        if not os.path.exists(fulld + '/setup.py'):
+            continue
+        srcdirs.add(d)
+        if (os.path.exists(fulld + '/requirements.txt') or
+                os.path.exists(fulld + '/pip-requirements.txt')):
+            reqdirs.add(d)
+    try:
+        srcdirs.remove('ckan')
+        reqdirs.remove('ckan')
+    except KeyError:
+        raise DatacatsError('ckan not found in environment directory')
+
+    if clean:
+        environment.clean_virtualenv()
+        environment.install_extra()
+
+    for s in ['ckan'] + sorted(srcdirs):
+        environment.install_package_develop(s, None)
+    for s in ['ckan'] + sorted(reqdirs):
+        environment.install_package_requirements(s, None)

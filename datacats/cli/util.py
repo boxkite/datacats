@@ -77,7 +77,6 @@ class CLIProgressTracker(object):
         # with the same number of symbols (as tty sucks as a UI)
         # so will store len of prev message too
         self.prev_sym_len = 0
-        self.rendered = False
         self.stream.write("\n")
         self.show()
 
@@ -93,8 +92,8 @@ class CLIProgressTracker(object):
         if not meta:
             return
         self.current = meta.get('current', self.current)
+        self.total = meta.get('total', self.total)
         if 'status' in meta:
-            self.prev_status_len = len(self.status)
             self.status = meta.get('status')
         self.show()
 
@@ -127,22 +126,3 @@ class CLIProgressTracker(object):
         self.prev_sym_len = 0
         self.stream.write("\r")
         self.stream.flush()
-
-
-def function_as_step(func, description=None):
-    """
-    Returns a tuple of function and first string of docstring
-    to provide the user is some details on what the function does
-
-    For procedures with a lot of steps or that take a long time
-    one would like to print out a status message
-    to the user to provide her with more details of
-    what is going on.
-    """
-    if description:
-        return func, description
-    if func.__doc__:
-        doc_lines = func.__doc__.split('\n')
-        if len(doc_lines) > 0:
-            return func, doc_lines[1].lstrip().rstrip()
-    return func, func.__name__
