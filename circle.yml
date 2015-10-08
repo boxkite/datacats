@@ -7,7 +7,76 @@ dependencies:
     - pip install -r requirements_test.txt
 test:
   override:
-      - case $CIRCLE_NODE_INDEX in 0) bash -x ~/datacats/test.sh 2.3 ;; 1) bash -x ~/datacats/test.sh 2.4 ;; 2) bash -x ~/datacats/test.sh master ;; esac:
-          parallel: true
+    - ?
+        >
+        case $CIRCLE_NODE_INDEX in
+        0) echo 2.3 ;;
+        1) echo 2.4 ;;
+        2) echo master ;;
+        esac > ckan_version
+      : parallel: true
+    - datacats create site1 -bn --ckan `cat ckan_version`:
+        parallel: true
+    - "[ ! -d site1/ckanext-site1theme ]":
+        parallel: true
+    - "[ \"$(echo `datacats list`)\" == site1 ]":
+        parallel: true
+    - datacats info site1:
+        parallel: true
+    - datacats start site1 8999:
+        parallel: true
+    - datacats info site1:
+        parallel: true
+    - datacats shell site1 echo hello from inside site1:
+        parallel: true
+    - datacats logs site1:
+        parallel: true
+    - datacats create site2 -n --ckan `cat ckan_version`:
+        parallel: true
+    - "[ -d site2/ckanext-site2theme ]":
+        parallel: true
+    - "[ \"$(echo `datacats list`)\" == 'site1 site2' ]":
+        parallel: true
+### FIXME: Redis doesn't pull right on CircleCI's docker storage driver (btrfs):
+#datacats tweak --add-redis site1:
+    - datacats reload site1:
+        parallel: true
+#[ "$(docker ps | grep datacats_redis_site1_primary | wc -l)" == 1 ]:
+    - "[ \"$(cat ~/.datacats/site1/sites/primary/run/development.ini | egrep 127.0.0.1 | wc -l | xargs)\" == 0 ]":
+        parallel: true
+    - datacats purge -y site1:
+        parallel: true
+    - "[ \"$(echo `datacats list`)\" == site2 ]":
+        parallel: true
+    - datacats init site1 -n:
+        parallel: true
+    - datacats reset -yn site1:
+        parallel: true
+    - datacats install site1:
+        parallel: true
+    - datacats migrate -y -r 1 site1:
+        parallel: true
+    - "[ -e ~/.datacats/site1/postgres ]":
+        parallel: true
+    - datacats purge -y site1:
+        parallel: true
+    - datacats init -n site1:
+        parallel: true
+    - datacats migrate -y -r 1 site1:
+        parallel: true
+    - datacats migrate -y -r 2 site1:
+        parallel: true
+    - datacats init site1 -s two -n:
+        parallel: true
+    - datacats install --clean site1:
+        parallel: true
+    - datacats shell site1 cat /usr/lib/ckan/bin/ckanapi:
+        parallel: true
+    - datacats start -s two site1:
+        parallel: true
+    - "[ -e ~/.datacats/site1/sites/primary/postgres ]":
+        parallel: true
+    - "[ $(datacats --version | wc -l) == 1 ]":
+        parallel: true
   post:
       - python setup.py test
