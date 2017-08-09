@@ -16,6 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -q -y install \
         libpq-dev \
         libxml2-dev \
         libxslt1-dev \
+        libffi-dev \
         wget \
         postfix \
         build-essential \
