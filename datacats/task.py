@@ -472,7 +472,7 @@ def create_source(srcdir, preload_image, datapusher=False):
 
 
 # Maps container extra names to actual names
-EXTRA_IMAGE_MAPPING = {'redis': 'redis'}
+EXTRA_IMAGE_MAPPING = {'redis': 'redis', 'pycsw': 'datacats/pycsw'}
 
 
 def start_supporting_containers(sitedir, srcdir, passwords,
@@ -546,7 +546,7 @@ def containers_running(get_container_name):
     Return a list of containers tracked by this environment that are running
     """
     running = []
-    for n in ['web', 'postgres', 'solr', 'datapusher', 'redis']:
+    for n in ['web', 'postgres', 'solr', 'datapusher', 'redis', 'pycsw']:
         info = docker.inspect_container(get_container_name(n))
         if info and not info['State']['Running']:
             running.append(n + '(halted)')

@@ -17,6 +17,7 @@ docker build -t datacats/solr solr/
 docker build -t datacats/postgres postgres/
 docker build -t datacats/web web/
 docker build -t datacats/lessc lessc/
+docker build -t datacats/pycsw pycsw/
 docker build -t datacats/ckan ckan/
 docker build -t datacats/ckan:2.3 -f ckan/Dockerfile-2.3 ckan/
 docker build -t datacats/ckan:2.4 -f ckan/Dockerfile-2.4 ckan/
@@ -28,4 +29,6 @@ docker push datacats/web
 docker push datacats/postgres
 docker push datacats/solr
 docker push datacats/lessc
+docker push datacats/pycsw
 docker push datacats/ckan
+

@@ -272,11 +272,13 @@ def tweak(environment, opts):
 Usage:
   datacats tweak --install-postgis [ENVIRONMENT]
   datacats tweak --add-redis [ENVIRONMENT]
+  datacats tweak --add-pycsw [ENVIRONMENT]
   datacats tweak --admin-password [ENVIRONMENT]
 
 Options:
   --install-postgis    Install postgis in ckan database
   --add-redis          Adds redis next time this environment reloads
+  --add-pycsw          Adds pycsw next time this environment reloads
   -s --site=NAME       Choose a site to tweak [default: primary]
   -p --admin-password  Prompt to change the admin password
 
@@ -295,5 +297,11 @@ Default: '.'
             'to reload your environment for these changes to take effect ("datacats reload {}")'
             .format(environment.name))
         environment.add_extra_container('redis', error_on_exists=True)
+    if opts['--add-pycsw']:
+        # Let the user know if they are trying to add it and it is already there
+        print ('Adding additional pycsw container... Please note that you will have '
+            'to reload your environment for these changes to take effect ("datacats reload {}")'
+            .format(environment.name))
+        environment.add_extra_container('pycsw', error_on_exists=True)
     if opts['--admin-password']:
         environment.create_admin_set_password(confirm_password())
